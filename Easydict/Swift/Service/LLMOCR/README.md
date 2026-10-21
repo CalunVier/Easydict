@@ -41,10 +41,13 @@ controller checks the current model and image before updating UI or copying text
 
 ## Verification status
 
-Implementation is not yet compiled or tested on macOS. Dedicated offline client
-tests and a loopback HTTP fixture exercise request construction, result mapping,
-errors and superseded requests. The GitHub Actions workflow forwards the fixture
+Commit `36a3e0c3cd407eda988e32723526bafe4f8b64d5` passed macOS Debug compilation
+and 43 tests across four suites in [GitHub Actions](https://github.com/CalunVier/Easydict/actions/runs/39594077034).
+This includes offline client checks, six loopback HTTP integration tests and the
+existing Markdown/WebKit regression suites. The workflow forwards the fixture
 endpoint to the test runner and requires the integration suite to actually pass.
-Live provider validation requires
-an explicitly authorized endpoint/model and credentials; none have been used.
-The prior Markdown CI does not validate this feature.
+
+The fixture validates protocol behavior and data flow, not visual recognition quality.
+No real provider credentials or model calls were used. Live provider validation
+and manual UI acceptance are still outstanding. Release, Intel, distribution signing
+and notarization were not verified; the produced arm64 Debug app is for evaluation.

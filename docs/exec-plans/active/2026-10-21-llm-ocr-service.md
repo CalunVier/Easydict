@@ -44,14 +44,17 @@
 - [x] 确认截图到现有翻译的文本边界。
 - [x] 配置、客户端和服务实现。
 - [x] 设置、时序边界与本地化。
-- [ ] 获授权的测试、CI 和审查。
+- [x] 获授权的离线测试、GitHub Actions 编译和代码审查。
+- [ ] 真实服务识别质量与手动交互验收。
 
 ## 验证
 
 - 基线：`5a594f1ecf069d1eac995926ff72c7fb3602f1ff`，工作树初始干净。
 - `git diff --check`、本地化 JSON 及六种语言覆盖、工程文件引用静态检查通过。
 - 只读审查发现 OCR 错误/取消时 loading 和原输入恢复问题，已通过视图控制器请求世代及当前输入恢复修复。
-- 当前尚未编译或运行 LLM OCR 测试；不得沿用 Markdown CI 结果作为本功能证据。
+- 提交 `36a3e0c3cd407eda988e32723526bafe4f8b64d5` 的 macOS Debug 编译及 43 项测试、4 个 suite 全部通过。包括 OCR 客户端、6 项本机接口集成测试和两组 Markdown 回归测试。
+- CI：https://github.com/CalunVier/Easydict/actions/runs/39594077034 。集成 suite 实际执行而非跳过；已生成 arm64 Debug 应用。
+- 合成 HTTP fixture 只验证协议与流程，不证明真实多模态模型的识别准确度；真实模型和手动 UI、Release/Intel、正式签名及公证未验证。
 - 已获准新增测试、新分支推送与 GitHub Actions；验证将使用本机 HTTP fixture，不调用真实模型或使用用户凭据。
 
 ## 完成条件
