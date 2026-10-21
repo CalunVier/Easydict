@@ -6,6 +6,7 @@
 //  Copyright © 2024 izual. All rights reserved.
 //
 
+import Defaults
 import Foundation
 import SystemConfiguration
 
@@ -40,7 +41,7 @@ public final class DetectManager: NSObject {
     /// The query model containing text and image data to be processed.
     public var queryModel: QueryModel
 
-    /// The OCR service used for text recognition (defaults to AppleService).
+    /// The service selected for the latest OCR request (Apple by default).
     public private(set) var ocrService: QueryService
 
     // MARK: - Static Factory
@@ -154,27 +155,42 @@ public final class DetectManager: NSObject {
     /// Performs OCR on the query model's image.
     /// - Parameter completion: Callback with the OCR result and optional error.
     public func ocr(completion: @escaping (EZOCRResult?, Error?) -> ()) {
-        guard queryModel.ocrImage != nil else {
-            let error = QueryError.error(type: .parameter, message: "ocr image cannot be nil")
-            completion(nil, error)
+        Task { @MainActor in
+            startOCR(completion: completion)
+        }
+    }
+
+    /// Snapshots each request so a slow remote response cannot replace newer input.
+    @MainActor
+    private func startOCR(completion: @escaping (EZOCRResult?, Error?) -> ()) {
+        ocrTask?.cancel()
+        let requestID = UUID()
+        ocrRequestID = requestID
+        let model = queryModel
+        guard let image = model.ocrImage else {
+            completion(nil, QueryError.error(type: .parameter, message: "ocr image cannot be nil"))
             return
         }
+        let originalText = model.inputText
+        let from = model.queryFromLanguage
+        let to = model.queryTargetLanguage
+        let service: QueryService = Defaults[.enableLLMOCR] ? LLMOCRService() : AppleService.shared
+        ocrService = service
 
-        Task { [weak self] in
-            guard let self else {
-                completion(nil, nil)
-                return
-            }
-
+        ocrTask = Task { @MainActor in
             do {
-                let result = try await ocrService.ocr(queryModel)
-                await MainActor.run {
-                    completion(result, nil)
+                let result = try await service.ocr(image, from: from, to: to)
+                try Task.checkCancellation()
+                guard ocrRequestID == requestID, queryModel === model,
+                      model.ocrImage === image, model.inputText == originalText,
+                      model.queryFromLanguage == from, model.queryTargetLanguage == to else {
+                    completion(nil, URLError(.cancelled))
+                    return
                 }
+                completion(result, nil)
             } catch {
-                await MainActor.run {
-                    completion(nil, error)
-                }
+                let cancelled = Task.isCancelled || ocrRequestID != requestID
+                completion(nil, cancelled ? URLError(.cancelled) : error)
             }
         }
     }
@@ -196,6 +212,9 @@ public final class DetectManager: NSObject {
     // MARK: Private
 
     // MARK: - Private Properties
+
+    @MainActor private var ocrTask: Task<Void, Never>?
+    @MainActor private var ocrRequestID = UUID()
 
     private var allowsDetachedDetection = false
 

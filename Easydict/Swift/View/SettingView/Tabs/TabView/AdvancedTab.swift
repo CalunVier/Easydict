@@ -245,6 +245,8 @@ struct AdvancedTab: View {
 
             // OCR settings section
             Section {
+                LLMOCRConfigurationView()
+
                 Toggle(isOn: $enableYoudaoOCR) {
                     AdvancedTabItemView(
                         color: .blue,

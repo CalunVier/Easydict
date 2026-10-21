@@ -70,6 +70,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
 @property (nonatomic, strong) EZQueryService *youdaoService;
 
 @property (nonatomic, strong) EZDetectManager *detectManager;
+@property (nonatomic, assign) NSUInteger ocrRequestGeneration;
 @property (nonatomic, strong) EZAudioPlayer *audioPlayer;
 @property (nonatomic, strong) EZSchemeParser *schemeParser;
 
@@ -540,6 +541,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     MMLogInfo(@"start OCR Image: %@, actionType: %@", @(image.size), actionType);
     MMLogInfo(@"ocr language: %@", self.queryModel.queryFromLanguage);
 
+    NSUInteger requestGeneration = ++self.ocrRequestGeneration;
     self.queryModel.actionType = actionType;
     self.queryModel.ocrImage = image;
 
@@ -549,6 +551,25 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     mm_weakify(self);
     [self.detectManager ocrAndDetectTextWithCompletion:^(EZQueryModel *_Nonnull queryModel, NSError *_Nullable error) {
         mm_strongify(self);
+        // A newer OCR owns its loading state. Otherwise always release this request's UI,
+        // including when the user cleared or changed the input during remote recognition.
+        if (!self || self.ocrRequestGeneration != requestGeneration) {
+            return;
+        }
+        [self.queryView startLoadingAnimation:NO];
+        if (error || self.queryModel != queryModel || self.queryModel.ocrImage != image) {
+            // Loading replaces the editor text with a spacer; restore only the current input.
+            [self.queryView.textView updateTextAndParagraphStyle:self.queryModel.inputText];
+        }
+        if (self.queryModel != queryModel || self.queryModel.ocrImage != image ||
+            ([error.domain isEqualToString:NSURLErrorDomain] && error.code == NSURLErrorCancelled)) {
+            return;
+        }
+        if (error) {
+            [EZToast showToast:error.localizedDescription];
+            return;
+        }
+
         // !!!: inputText should be used here, not queryText, queryText may be modified, such as easydict://query?text=xxx
         NSString *inputText = queryModel.inputText;
         MMLogInfo(@"ocr result: %@", inputText);
@@ -572,22 +593,12 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
 
 
         if (actionType != EZActionTypeScreenshotOCR) {
-            [self.queryView startLoadingAnimation:NO];
-
             self.inputText = inputText;
 
             // Show detected language, even auto
             self.queryModel.showAutoLanguage = YES;
 
             [self updateQueryTextAndParagraphStyle:inputText actionType:actionType];
-
-            if (error) {
-                NSString *errorMsg = [error localizedDescription];
-                dispatch_block_on_main_safely(^{
-                    [EZToast showToast:errorMsg];
-                });
-                return;
-            }
 
             if (self.config.autoCopyOCRText) {
                 [inputText copyToPasteboard];

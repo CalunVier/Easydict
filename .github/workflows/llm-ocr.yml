@@ -1,0 +1,81 @@
+name: LLM OCR validation
+
+on:
+  push:
+    branches: [feature/llm-ocr]
+  pull_request:
+    paths:
+      - 'Easydict/Swift/Service/LLMOCR/**'
+      - 'Easydict/Swift/Model/DetectManager.swift'
+      - 'Easydict/Swift/View/SettingView/Tabs/TabView/AdvancedTab.swift'
+      - 'Easydict/objc/ViewController/Window/BaseQueryWindow/EZBaseQueryViewController.m'
+      - 'Easydict/App/Localizable.xcstrings'
+      - 'EasydictTests/Service/LLMOCR/**'
+      - 'Easydict.xcodeproj/project.pbxproj'
+      - '.github/workflows/llm-ocr.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: llm-ocr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    runs-on: xcode-27
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          sw_vers -productVersion
+      - name: Build and test with a local OCR fixture
+        shell: bash
+        env:
+          TEST_RUNNER_EASYDICT_LLM_OCR_TEST_ENDPOINT: http://127.0.0.1:18767/v1/chat/completions
+        run: |
+          set -euo pipefail
+          python3 EasydictTests/Service/LLMOCR/fixture_server.py --port 18767 > "$RUNNER_TEMP/llm-ocr-fixture.log" 2>&1 &
+          fixture_pid=$!
+          trap 'kill "$fixture_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..50}; do
+            if curl --silent --fail http://127.0.0.1:18767/health > /dev/null; then break; fi
+            sleep 0.1
+          done
+          curl --silent --fail http://127.0.0.1:18767/health > /dev/null
+          xcodebuild test \
+            -workspace Easydict.xcworkspace \
+            -scheme Easydict \
+            -configuration Debug \
+            -destination 'platform=macOS,arch=arm64' \
+            -derivedDataPath "$RUNNER_TEMP/Easydict-LLMOCR" \
+            -resultBundlePath "$RUNNER_TEMP/LLMOCR.xcresult" \
+            -only-testing:EasydictTests/LLMOCRClientTests \
+            -only-testing:EasydictTests/LLMOCRServiceTests \
+            -only-testing:EasydictTests/MarkdownRendererTests \
+            -only-testing:EasydictTests/RichMarkdownViewTests \
+            EASYDICT_RELEASE_PACKAGING=YES \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= \
+            2>&1 | tee "$RUNNER_TEMP/llm-ocr-xcodebuild.log"
+          # A missing forwarded endpoint must not turn integration coverage into a green skip.
+          grep -F 'Suite "LLM OCR Service" passed' "$RUNNER_TEMP/llm-ocr-xcodebuild.log"
+      - name: Package debug application
+        shell: bash
+        run: |
+          set -euo pipefail
+          app="$(find "$RUNNER_TEMP/Easydict-LLMOCR/Build/Products/Debug" -maxdepth 1 -name '*.app' -print -quit)"
+          test -n "$app"
+          ditto -c -k --sequesterRsrc --keepParent "$app" "$RUNNER_TEMP/Easydict-LLMOCR-debug.zip"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: llm-ocr-validation
+          path: |
+            ${{ runner.temp }}/llm-ocr-xcodebuild.log
+            ${{ runner.temp }}/llm-ocr-fixture.log
+            ${{ runner.temp }}/LLMOCR.xcresult
+            ${{ runner.temp }}/Easydict-LLMOCR-debug.zip
+          retention-days: 7
