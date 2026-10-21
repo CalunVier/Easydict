@@ -15,13 +15,29 @@ struct RichMarkdownViewTests {
     @Test("Bundled resources render tables and accessible math")
     func tablesAndMath() async throws {
         let view = RichMarkdownView(frame: NSRect(x: 0, y: 0, width: 360, height: 400))
+        // Height reporting follows WebKit animation frames, so exercise a visible,
+        // laid-out viewport rather than a detached, zero-sized child web view.
+        let window = NSWindow(contentRect: view.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.contentView = view
+        window.orderFront(nil)
+        view.layoutSubtreeIfNeeded()
+        defer { window.close() }
         view.updateMarkdown("| A | B |\n| - | - |\n| 1 | 2 |\n\n$$\\frac{1}{2}$$", fontSize: 14)
         let web = try #require(view.subviews.compactMap { $0 as? WKWebView }.first)
         try await wait(web, for: "document.querySelectorAll('table').length === 1 && document.querySelectorAll('math').length === 1")
-        for _ in 0 ..< 160 where view.contentHeight <= 40 {
+        var domHeight = 0.0
+        for _ in 0 ..< 160 {
+            let measuredHeight = try await web.evaluateJavaScript("Math.ceil(document.getElementById('content').getBoundingClientRect().height)")
+            domHeight = try #require(measuredHeight as? Double)
+            if domHeight > 40, abs(Double(view.contentHeight) - domHeight) <= 1 { break }
             try await Task.sleep(for: .milliseconds(50))
         }
+        #expect(view.window === window)
+        #expect(web.bounds.width > 0)
+        #expect(domHeight > 40)
         #expect(view.contentHeight > 40)
+        #expect(abs(Double(view.contentHeight) - domHeight) <= 1)
         let resources = try await web.evaluateJavaScript("performance.getEntriesByType('resource').map(r => r.name).filter(n => /^https?:/.test(n)).length")
         #expect((resources as? Int) == 0)
     }
