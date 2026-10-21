@@ -46,6 +46,11 @@
 }
 
 - (void)queryInApp:(id)sender {
+    [EZQueryMenuTextView queryTextInApp:self.queryText];
+}
+
++ (void)queryTextInApp:(NSString *)text {
+    if (text.length == 0) { return; }
     EZWindowType anotherWindowType;
     EZActionType actionType = EZActionTypeInvokeQuery;
 
@@ -68,7 +73,7 @@
             // Focus query view controller, make sure floating window type is current query window.
             [windowManager orderFrontWindowAndFocusInputTextView:anotherFloatingWindow];
             EZBaseQueryViewController *anotherQueryViewController = anotherFloatingWindow.queryViewController;
-            [anotherQueryViewController startQueryText:self.queryText actionType:actionType];
+            [anotherQueryViewController startQueryText:text actionType:actionType];
         } else {
             NSScreen *screen = EZLayoutManager.shared.screen;
             // Top left of current screen.
@@ -76,13 +81,13 @@
             CGPoint absolutePoint = [EZCoordinateUtils getTopLeftPoint:point inScreen:screen];
 
             [windowManager showFloatingWindowType:anotherWindowType
-                                        queryText:self.queryText
+                                        queryText:text
                                        actionType:actionType
                                           atPoint:absolutePoint
                                 completionHandler:nil];
         }
     } else {
-        [windowManager.floatingWindow.queryViewController startQueryText:self.queryText actionType:actionType];
+        [windowManager.floatingWindow.queryViewController startQueryText:text actionType:actionType];
     }
 
     NSDictionary *parameters = @{

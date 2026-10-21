@@ -220,6 +220,11 @@ public class QueryResult: NSObject {
     /// new query so a fresh result tracks the global setting again.
     var markdownRenderingOverride: Bool?
 
+    /// Presentation state belongs to the result, not a recycled table cell.
+    /// Created on demand by the main-thread UI and cleared with a new query.
+    var richMarkdownView: RichMarkdownView?
+
+
     var translatedResults: [String]? {
         get {
             translatedResultsLock.lock()
@@ -280,7 +285,7 @@ public class QueryResult: NSObject {
 
     /// Returns property names that should be ignored by MJExtension.
     class func mj_ignoredPropertyNames() -> [String] {
-        []
+        ["richMarkdownView"]
     }
 
     /// Flips the Markdown rendering decision for this result, overriding the
@@ -320,6 +325,7 @@ public class QueryResult: NSObject {
         webViewManager.reset()
         showReplaceButton = false
         markdownRenderingOverride = nil
+        richMarkdownView = nil
     }
 
     /// Converts translated results to Traditional Chinese.

@@ -1,0 +1,85 @@
+name: Rich Markdown validation
+
+on:
+  push:
+    branches: [feature/rich-markdown-rendering]
+  pull_request:
+    paths:
+      - 'Easydict/Swift/Feature/Markdown/**'
+      - 'EasydictTests/Feature/Markdown/**'
+      - 'Easydict/objc/ViewController/View/WordResultView/**'
+      - 'Easydict.xcodeproj/**'
+      - 'Easydict/Swift/Service/Model/QueryResult.swift'
+      - 'Easydict/objc/ViewController/View/EZQueryMenuTextView/**'
+      - '.github/workflows/rich-markdown.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rich-markdown-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  renderer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: Easydict/Swift/Feature/Markdown/WebRenderer
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts
+      - run: npm run test:unit
+      - run: npm run build
+      - run: npm run test:dom
+      - name: Check checked-in resources match sources
+        run: git diff --exit-code -- ../MarkdownResources
+      - name: Browser regression checks
+        run: CHROMIUM_PATH="$(command -v google-chrome)" npm test
+
+  macos:
+    runs-on: xcode-27
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          sw_vers -productVersion
+      - name: Build and run Markdown tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -workspace Easydict.xcworkspace \
+            -scheme Easydict \
+            -configuration Debug \
+            -destination 'platform=macOS,arch=arm64' \
+            -derivedDataPath "$RUNNER_TEMP/Easydict-Markdown" \
+            -resultBundlePath "$RUNNER_TEMP/Markdown.xcresult" \
+            -only-testing:EasydictTests/MarkdownRendererTests \
+            -only-testing:EasydictTests/RichMarkdownViewTests \
+            EASYDICT_RELEASE_PACKAGING=YES \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= \
+            2>&1 | tee "$RUNNER_TEMP/markdown-xcodebuild.log"
+      - name: Package debug application
+        shell: bash
+        run: |
+          set -euo pipefail
+          app="$(find "$RUNNER_TEMP/Easydict-Markdown/Build/Products/Debug" -maxdepth 1 -name '*.app' -print -quit)"
+          test -n "$app"
+          ditto -c -k --sequesterRsrc --keepParent "$app" "$RUNNER_TEMP/Easydict-Markdown-debug.zip"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: markdown-validation
+          path: |
+            ${{ runner.temp }}/markdown-xcodebuild.log
+            ${{ runner.temp }}/Markdown.xcresult
+            ${{ runner.temp }}/Easydict-Markdown-debug.zip
+          retention-days: 7

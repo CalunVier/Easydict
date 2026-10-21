@@ -116,6 +116,11 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
 
 @property (nonatomic, assign) CGFloat fontSizeRatio;
 
+// Kept across streaming refreshes so WebKit does not reload the document per token.
+@property (nonatomic, strong) EDRichMarkdownView *richMarkdownView;
+@property (nonatomic, assign) CGFloat markdownViewportHeight;
+@property (nonatomic, copy) NSString *richMarkdownQueryText;
+
 + (void)applyTagButtonAppearance:(NSButton *)tagButton tagColor:(NSColor *)tagColor fontSize:(CGFloat)fontSize;
 - (void)fetchDictionaryHTMLTextIfNeeded;
 
@@ -164,6 +169,16 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
         }
     }
 
+    if (previousResult != result || ![self.richMarkdownQueryText isEqualToString:result.queryText] ||
+        ![self.service isStream] ||
+        !result.isMarkdownRenderingEnabled || result.errorMessage.length > 0) {
+        if (self.richMarkdownView.superview == self) {
+            self.richMarkdownView.heightDidChange = nil;
+        }
+        self.richMarkdownView = nil;
+    }
+
+    self.richMarkdownQueryText = result.queryText;
     self.result = result;
     self.fontSizeRatio = MyConfiguration.shared.fontSizeRatio;
 
@@ -265,16 +280,56 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
                 text = NSLocalizedString(@"no_results_found", nil);
             }
 
-            if (text) {
-                EZLabel *resultLabel;
-                BOOL serviceIsStreaming = [self.service isStream];
-                if (serviceIsStreaming && errorMessage.length == 0) {
-                    EDMarkdownLabel *markdownLabel = [[EDMarkdownLabel alloc] init];
-                    markdownLabel.markdownEnabled = result.isMarkdownRenderingEnabled;
-                    resultLabel = markdownLabel;
-                } else {
-                    resultLabel = [[EZLabel alloc] init];
+            BOOL useRichMarkdown = text && [self.service isStream] &&
+                errorMessage.length == 0 && result.isMarkdownRenderingEnabled;
+            if (useRichMarkdown) {
+                if (!result.richMarkdownView) {
+                    result.richMarkdownView = [[EDRichMarkdownView alloc] initWithFrame:NSZeroRect];
                 }
+                self.richMarkdownView = result.richMarkdownView;
+                EDRichMarkdownView *markdownView = self.richMarkdownView;
+                [self addSubview:markdownView];
+                CGFloat maximumHeight = (self.window.screen ?: NSScreen.mainScreen).visibleFrame.size.height * 0.55;
+                self.markdownViewportHeight = MIN(markdownView.contentHeight, MAX(200, maximumHeight));
+                CGFloat topOffset = explainTextFieldTopOffset + result.translateResultsTopInset;
+                [markdownView mas_remakeConstraints:^(MASConstraintMaker *make) {
+                    make.left.equalTo(self).offset(kHorizontalMargin_8);
+                    make.right.equalTo(self).offset(-kHorizontalMargin_8);
+                    if (lastView) {
+                        make.top.equalTo(lastView.mas_bottom).offset(topOffset);
+                    } else {
+                        make.top.equalTo(self).offset(topOffset);
+                    }
+                    make.height.mas_equalTo(self.markdownViewportHeight);
+                }];
+                __weak EZQueryResult *expectedResult = result;
+                __weak EDRichMarkdownView *expectedView = markdownView;
+                markdownView.heightDidChange = ^(CGFloat contentHeight) {
+                    mm_strongify(self);
+                    EDRichMarkdownView *view = expectedView;
+                    EZQueryResult *activeResult = expectedResult;
+                    if (!self || !view || !activeResult || self.result != activeResult ||
+                        activeResult.richMarkdownView != view || view.superview != self || !activeResult.isMarkdownRenderingEnabled) {
+                        return;
+                    }
+                    CGFloat limit = (self.window.screen ?: NSScreen.mainScreen).visibleFrame.size.height * 0.55;
+                    CGFloat newHeight = MIN(contentHeight, MAX(200, limit));
+                    CGFloat difference = newHeight - self.markdownViewportHeight;
+                    if (fabs(difference) < 0.5) { return; }
+                    self.markdownViewportHeight = newHeight;
+                    self->_viewHeight += difference;
+                    [view mas_updateConstraints:^(MASConstraintMaker *make) { make.height.mas_equalTo(newHeight); }];
+                    if (self.updateViewHeightBlock) { self.updateViewHeightBlock(self.viewHeight); }
+                    EZBaseQueryWindow *window = [self.window isKindOfClass:EZBaseQueryWindow.class]
+                        ? (EZBaseQueryWindow *)self.window : nil;
+                    [window.queryViewController updateCellWithResult:activeResult reloadData:NO];
+                };
+                [markdownView updateMarkdown:text fontSize:14 * self.fontSizeRatio];
+                height += topOffset + self.markdownViewportHeight;
+                lastView = markdownView;
+            } else if (text) {
+                EZLabel *resultLabel;
+                resultLabel = [[EZLabel alloc] init];
                 resultLabel.font = [NSFont systemFontOfSize:14 * self.fontSizeRatio];
                 [self addSubview:resultLabel];
 

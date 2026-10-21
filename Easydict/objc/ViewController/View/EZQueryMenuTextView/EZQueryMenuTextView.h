@@ -14,6 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)queryInApp:(id)sender;
 
+/// Reuses the configured selection-lookup window routing for native and web-rendered text.
++ (void)queryTextInApp:(NSString *)text NS_SWIFT_NAME(queryInApp(_:));
+
 @end
 
 NS_ASSUME_NONNULL_END

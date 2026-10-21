@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ED2026102100000000000005 /* RichMarkdownViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2026102100000000000006 /* RichMarkdownViewTests.swift */; };
+		ED2026102100000000000001 /* RichMarkdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2026102100000000000002 /* RichMarkdownView.swift */; };
+		ED2026102100000000000003 /* MarkdownResources in Resources */ = {isa = PBXBuildFile; fileRef = ED2026102100000000000004 /* MarkdownResources */; };
 		D71101351011000000000003 /* EZQueryTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D71101351011000000000002 /* EZQueryTableView.m */; };
 		C0FFEEBF2026092400000000 /* GitHubCopilotDebugWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEEFD2026092400000000 /* GitHubCopilotDebugWindow.swift */; };
 		C0FFEEBF2026092400000001 /* GitHubCopilotEffort.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEEFD2026092400000001 /* GitHubCopilotEffort.swift */; };
@@ -688,6 +691,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		ED2026102100000000000006 /* RichMarkdownViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichMarkdownViewTests.swift; sourceTree = "<group>"; };
+		ED2026102100000000000002 /* RichMarkdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichMarkdownView.swift; sourceTree = "<group>"; };
+		ED2026102100000000000004 /* MarkdownResources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = MarkdownResources; sourceTree = "<group>"; };
 		D71101351011000000000001 /* EZQueryTableView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EZQueryTableView.h; sourceTree = "<group>"; };
 		D71101351011000000000002 /* EZQueryTableView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EZQueryTableView.m; sourceTree = "<group>"; };
 		C0FFEEFD2026092400000000 /* GitHubCopilotDebugWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubCopilotDebugWindow.swift; sourceTree = "<group>"; };
@@ -1500,6 +1506,8 @@
 			isa = PBXGroup;
 			children = (
 				02DEDC042026043000000002 /* MarkdownRenderer.swift */,
+				ED2026102100000000000002 /* RichMarkdownView.swift */,
+				ED2026102100000000000004 /* MarkdownResources */,
 				02DEDC042026043000000003 /* MarkdownLabel.swift */,
 				02DEDC042026043000000004 /* MarkdownToggleButton.swift */,
 			);
@@ -1510,6 +1518,7 @@
 			isa = PBXGroup;
 			children = (
 				02DEDC04202604300000000A /* MarkdownRendererTests.swift */,
+				ED2026102100000000000006 /* RichMarkdownViewTests.swift */,
 			);
 			path = Markdown;
 			sourceTree = "<group>";
@@ -4200,6 +4209,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED2026102100000000000003 /* MarkdownResources in Resources */,
 				CA9CF8A72D2E6D3C000C1860 /* 人的一生_v4.json in Resources */,
 				03BFBB802923A2FA00C48725 /* white-black-icon@2x.png in Resources */,
 				031DBD792AE01E130071CF85 /* easydict in Resources */,
@@ -4408,6 +4418,7 @@
 			files = (
 				1CC83D91B3954BE7894CC2C8 /* MDictReaderTests.swift in Sources */,
 				02DEDC0420260430000000BE /* MarkdownRendererTests.swift in Sources */,
+				ED2026102100000000000005 /* RichMarkdownViewTests.swift in Sources */,
 				A12760012026090500000001 /* ReverseTranslationTests.swift in Sources */,
 				C09AC0F264D246FC90F9A277 /* AppleServiceTests.swift in Sources */,
 				03A884782F13000100D5C0DE /* AppleScriptExecutorTests.swift in Sources */,
@@ -4489,6 +4500,7 @@
 				031C66E02EDB00010025D190 /* DictionaryHTMLRenderer.swift in Sources */,
 				B8D793EA87784E0B9D82C7FC /* MDictConfigurationView.swift in Sources */,
 				02DEDC04202604300000007E /* MarkdownRenderer.swift in Sources */,
+				ED2026102100000000000001 /* RichMarkdownView.swift in Sources */,
 				02DEDC04202604300000008E /* MarkdownLabel.swift in Sources */,
 				02DEDC04202604300000009E /* MarkdownToggleButton.swift in Sources */,
 				0338210C2F0EAF490087A361 /* AppleScriptTask.swift in Sources */,
