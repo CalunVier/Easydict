@@ -43,8 +43,8 @@ struct RichMarkdownViewTests {
         view.updateMarkdown("<script>window.pwned=1</script>\n![alt](https://example.com/private)\n**done**", fontSize: 14)
         let web = try #require(view.subviews.compactMap { $0 as? WKWebView }.first)
         try await wait(web, for: "document.querySelector('strong')?.textContent === 'done'")
-        let unsafe = try await web.evaluateJavaScript("!!window.pwned || document.querySelectorAll('#content img, #content script').length > 0")
-        #expect((unsafe as? Bool) == false)
+        let hasActiveContent = try await web.evaluateJavaScript("!!window.pwned || document.querySelectorAll('#content img, #content script').length > 0")
+        #expect((hasActiveContent as? Bool) == false)
     }
 
     private func wait(_ web: WKWebView, for predicate: String) async throws {
