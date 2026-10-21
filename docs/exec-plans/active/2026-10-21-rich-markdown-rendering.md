@@ -51,11 +51,12 @@
 - 初始工作树干净，基线 b4eced749d492d283f451f88e5504413e4533f44。
 - Node 解析器及缓存测试：14/14 通过；DOM 清理、增量复用及注入边界测试：9/9 通过。
 - 资源构建、JavaScript 语法和 `git diff --check` 通过；运行时 npm audit 未报告已知漏洞。
-- 已增加 9 项浏览器回归用例与 3 项原生 WebKit 测试，尚未完成执行。Linux Chromium 启动被运行环境 IPC 限制阻塞；不能将其报告为功能测试通过或功能断言失败。
-- GitHub 上传首次调用返回 403（集成无权访问）。维护者调整授权后，已验证 fork 可访问并创建独立功能分支；当前准备发布 CI 验证快照，尚未触发 Actions。
+- GitHub Actions 验证提交 `616fe7bf6ec67511aebea2ec725ee1fdeff98fb1`：14 项解析/缓存、9 项 DOM、9 项 Chromium 回归检查通过，离线资源一致性检查通过。
+- 同次 macOS Debug 编译及 26 项原生测试全部通过，包括 3 项实际 WebKit 桥接测试。运行记录：https://github.com/CalunVier/Easydict/actions/runs/39572548693 。
+- CI 修复记录：更正 WebKit 回调重载参数标签；测试变量避开 Swift 的 unsafe 语法；高度测试使用实际窗口并等待 DOM 与原生高度收敛，未降低断言。
 - 流式优化：有界公式缓存、保持相同位置的不变 DOM 块；修复 texmath 字符串替换误解释公式中的美元符号模式。仍执行完整 Markdown 解析和清理，不声称完全增量渲染。
 - 初次只读审查发现的降级内容滚动与选词路由问题已修复；后续复核增加查询重置及单元复用时的视图所有权检查。
-- macOS 编译及 WebKit 运行验证仍是阻塞项；不使用本地 Mac，不声明可合并。
+- 已生成 ad-hoc 签名的 arm64 Debug 应用，未做正式发布签名、公证或 Release/Intel 构建。真实使用场景的手动交互验证未完成，计划保持 active，不声明可合并。
 
 ## 完成条件
 
