@@ -156,7 +156,7 @@ final class RichMarkdownView: NSView, WKNavigationDelegate {
             "window.EDMarkdown.render(source, fontSize, dark, revision);",
             arguments: ["source": source, "fontSize": Double(fontSize), "dark": dark, "revision": revision],
             in: nil,
-            contentWorld: .page
+            in: .page
         ) { [weak self] result in
             guard let self else { return }
             rendering = false
