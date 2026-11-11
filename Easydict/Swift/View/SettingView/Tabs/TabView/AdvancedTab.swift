@@ -245,6 +245,8 @@ struct AdvancedTab: View {
 
             // OCR settings section
             Section {
+                LLMOCRConfigurationView()
+
                 Picker("setting.advance.ocr_service", selection: $ocrServiceID) {
                     Text("setting.advance.ocr_service.apple").tag(ServiceType.apple.rawValue)
                     ForEach(DetectManager.ocrServiceIDs, id: \.self) { identifier in
@@ -253,6 +255,7 @@ struct AdvancedTab: View {
                         }
                     }
                 }
+                .disabled(enableLLMOCR)
                 Text("setting.advance.ocr_service.description")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
@@ -475,6 +478,7 @@ struct AdvancedTab: View {
 
     @Default(.defaultTTSServiceType) private var defaultTTSServiceType
     @Default(.preferYoudaoTTSForEnglishWord) private var preferYoudaoTTSForEnglishWord
+    @Default(.enableLLMOCR) private var enableLLMOCR
     @Default(.ocrServiceID) private var ocrServiceID
     @Default(.enableYoudaoOCR) private var enableYoudaoOCR
     @Default(.enableCompatibilityReplace) private var enableCompatibilityReplace

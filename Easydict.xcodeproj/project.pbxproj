@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ED20261021BB000000000001 /* LLMOCRClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20261021BB000000000002 /* LLMOCRClientTests.swift */; };
+		ED20261021BB000000000101 /* LLMOCRServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20261021BB000000000102 /* LLMOCRServiceTests.swift */; };
+		ED20261021AA000000000001 /* LLMOCRConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20261021AA000000000002 /* LLMOCRConfiguration.swift */; };
+		ED20261021AA000000000101 /* LLMOCRClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20261021AA000000000102 /* LLMOCRClient.swift */; };
+		ED20261021AA000000000201 /* LLMOCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20261021AA000000000202 /* LLMOCRService.swift */; };
+		ED20261021AA000000000301 /* LLMOCRConfigurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20261021AA000000000302 /* LLMOCRConfigurationView.swift */; };
 		02DEDC04202604300000007E /* MarkdownRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DEDC042026043000000002 /* MarkdownRenderer.swift */; };
 		02DEDC04202604300000008E /* MarkdownLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DEDC042026043000000003 /* MarkdownLabel.swift */; };
 		02DEDC04202604300000009E /* MarkdownToggleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DEDC042026043000000004 /* MarkdownToggleButton.swift */; };
@@ -698,6 +704,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		ED20261021BB000000000002 /* LLMOCRClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMOCRClientTests.swift; sourceTree = "<group>"; };
+		ED20261021BB000000000102 /* LLMOCRServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMOCRServiceTests.swift; sourceTree = "<group>"; };
+		ED20261021AA000000000002 /* LLMOCRConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMOCRConfiguration.swift; sourceTree = "<group>"; };
+		ED20261021AA000000000102 /* LLMOCRClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMOCRClient.swift; sourceTree = "<group>"; };
+		ED20261021AA000000000202 /* LLMOCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMOCRService.swift; sourceTree = "<group>"; };
+		ED20261021AA000000000302 /* LLMOCRConfigurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMOCRConfigurationView.swift; sourceTree = "<group>"; };
 		003F53EF2A8C452998524A99 /* UtilityFunctionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilityFunctionsTests.swift; sourceTree = "<group>"; };
 		02DEDC042026043000000002 /* MarkdownRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRenderer.swift; sourceTree = "<group>"; };
 		02DEDC042026043000000003 /* MarkdownLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownLabel.swift; sourceTree = "<group>"; };
@@ -1518,6 +1530,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		ED20261021BB0000000000FF /* LLMOCR */ = {
+			isa = PBXGroup;
+			children = (
+				ED20261021BB000000000002 /* LLMOCRClientTests.swift */,
+				ED20261021BB000000000102 /* LLMOCRServiceTests.swift */,
+			);
+			path = LLMOCR;
+			sourceTree = "<group>";
+		};
+		ED20261021AA0000000000FF /* LLMOCR */ = {
+			isa = PBXGroup;
+			children = (
+				ED20261021AA000000000002 /* LLMOCRConfiguration.swift */,
+				ED20261021AA000000000102 /* LLMOCRClient.swift */,
+				ED20261021AA000000000202 /* LLMOCRService.swift */,
+				ED20261021AA000000000302 /* LLMOCRConfigurationView.swift */,
+			);
+			path = LLMOCR;
+			sourceTree = "<group>";
+		};
 		02DEDC042026043000000001 /* Markdown */ = {
 			isa = PBXGroup;
 			children = (
@@ -2165,6 +2197,7 @@
 				03779F0D2BB256A7008D3C42 /* OpenAI */,
 				036D627F2BCAB5C6002C95C7 /* BuiltInAI */,
 				0A9AFBA92B7F8D6A0064C9A8 /* CustomOpenAI */,
+				ED20261021AA0000000000FF /* LLMOCR */,
 				C415C0AB2B450C4500A9D231 /* Gemini */,
 				ED3EC55898A147C8B7CAFBD5 /* ClaudeCode */,
 				C0FFEE6A2026092400000001 /* GitHubCopilot */,
@@ -2965,6 +2998,7 @@
 				FA76B47A0150434485FCBBAD /* MDictReaderTests.swift */,
 				03C408F82EF5CB830025A1F0 /* ServiceTests.swift */,
 				A20908020000000000000021 /* OpenAI */,
+				ED20261021BB0000000000FF /* LLMOCR */,
 				03A884792F14000100D5C0DE /* BingServiceTests.swift */,
 				A5D1E5B50000000000000001 /* DeepLServiceTests.swift */,
 				0652043BE29F4DEC887CAA78 /* AppleServiceTests.swift */,
@@ -4472,6 +4506,8 @@
 			files = (
 				1CC83D91B3954BE7894CC2C8 /* MDictReaderTests.swift in Sources */,
 				02DEDC0420260430000000BE /* MarkdownRendererTests.swift in Sources */,
+				ED20261021BB000000000001 /* LLMOCRClientTests.swift in Sources */,
+				ED20261021BB000000000101 /* LLMOCRServiceTests.swift in Sources */,
 				A12760012026090500000001 /* ReverseTranslationTests.swift in Sources */,
 				C09AC0F264D246FC90F9A277 /* AppleServiceTests.swift in Sources */,
 				03A884782F13000100D5C0DE /* AppleScriptExecutorTests.swift in Sources */,
@@ -4560,6 +4596,10 @@
 				031C66E02EDB00010025D190 /* DictionaryHTMLRenderer.swift in Sources */,
 				B8D793EA87784E0B9D82C7FC /* MDictConfigurationView.swift in Sources */,
 				02DEDC04202604300000007E /* MarkdownRenderer.swift in Sources */,
+				ED20261021AA000000000001 /* LLMOCRConfiguration.swift in Sources */,
+				ED20261021AA000000000101 /* LLMOCRClient.swift in Sources */,
+				ED20261021AA000000000201 /* LLMOCRService.swift in Sources */,
+				ED20261021AA000000000301 /* LLMOCRConfigurationView.swift in Sources */,
 				AC2026102200000000001002 /* MarkdownMathRenderer.swift in Sources */,
 				AC2026102200000000001001 /* MarkdownInlineRenderer.swift in Sources */,
 				AC2026102200000000001000 /* MarkdownBlockParser.swift in Sources */,

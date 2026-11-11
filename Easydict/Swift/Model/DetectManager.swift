@@ -43,6 +43,7 @@ public final class DetectManager: NSObject {
 
     /// The OCR service used for text recognition (defaults to AppleService).
     public var ocrService: QueryService {
+        if Defaults[.enableLLMOCR] { return LLMOCRService() }
         let identifier = Defaults[.ocrServiceID]
         if let service = Self.selectedOCRService(identifier) {
             return service
